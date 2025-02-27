@@ -1,0 +1,53 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.itemRight {
+  margin-left: auto;
+}
+
+.chatBubble {
+  position: relative;
+  padding: 5px;
+  border-radius: 15px;
+  color: var(--background);
+  background-color: var(--foreground);
+  width: fit-content;
+}
+
+.arrowUpBefore::before,
+.arrowUpAfter::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid var(--foreground);
+}
+
+.arrowUpBefore::before {
+  position: absolute;
+  bottom: 0;
+  left: -5px;
+}
+
+.arrowUpAfter::after {
+  position: absolute;
+  bottom: 0;
+  right: -5px;
+}
+
+.aliasContainer {
+  display: flex;
+  width: 30px;
+  height: 30px;
+  color: var(--background);
+  background-color: var(--foreground);
+  font-weight: 900;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+}

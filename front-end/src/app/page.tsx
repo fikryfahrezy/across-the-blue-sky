@@ -1,7 +1,23 @@
+import { ChatBox } from "@/components/chat-box";
+import styles from "./page.module.css";
+
 export default function Home() {
   return (
-    <div>
-      <h1>Pikaaa...Chuu...</h1>
-    </div>
+    <main className={styles.main}>
+      <div className={styles.titleContainer}>
+        <h1>Chitty Chat</h1>
+      </div>
+
+      <div className={styles.chatBoxes}>
+        <ChatBox
+          title="Left Chat"
+          classNames={`${styles.chatBox} ${styles.chatBoxLeft}`}
+        />
+        <ChatBox
+          title="Right Chat"
+          classNames={`${styles.chatBox} ${styles.chatBoxRight}`}
+        />
+      </div>
+    </main>
   );
 }
