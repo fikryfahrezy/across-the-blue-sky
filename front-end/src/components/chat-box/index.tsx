@@ -1,3 +1,6 @@
+"use client";
+
+import { useChatSocket } from "@/hooks/use-chat-socket";
 import { ChatInput } from "../chat-input";
 import { ChatItem } from "../chat-item";
 import styles from "./styles.module.css";
@@ -8,6 +11,8 @@ export type ChatBoxProps = {
 };
 
 export function ChatBox({ title, classNames }: ChatBoxProps) {
+  useChatSocket({ url: process.env.NEXT_PUBLIC_WS_URL });
+
   return (
     <section className={`${styles.chatBox} ${classNames}`}>
       {title && (

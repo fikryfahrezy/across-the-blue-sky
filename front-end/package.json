@@ -7,24 +7,32 @@
     "pnpm": ">=10"
   },
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "concurrently \"npm run dev:ws\" \"npm run dev:next\"",
+    "dev:next": "next dev --turbopack",
+    "dev:ws": "node --env-file ./.env ./src/ws.mjs",
+    "build": "concurrently \"npm run build:ws\" \"npm run build:next\"",
+    "build:ws": "esbuild ./src/ws.mjs --bundle --platform=node --outfile=./dist/ws.js",
+    "build:next": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "next": "15.2.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "next": "15.2.0"
+    "ws": "8.18.1"
   },
   "devDependencies": {
-    "typescript": "5",
+    "@eslint/eslintrc": "3",
     "@types/node": "20",
     "@types/react": "19",
     "@types/react-dom": "19",
+    "@types/ws": "8.5.14",
+    "concurrently": "9.1.2",
+    "esbuild": "0.25.0",
     "eslint": "9",
     "eslint-config-next": "15.2.0",
-    "@eslint/eslintrc": "3"
+    "typescript": "5.7.3"
   },
   "packageManager": "pnpm@10.5.1+sha512.c424c076bd25c1a5b188c37bb1ca56cc1e136fbf530d98bcb3289982a08fd25527b8c9c4ec113be5e3393c39af04521dd647bcf1d0801eaf8ac6a7b14da313af"
 }

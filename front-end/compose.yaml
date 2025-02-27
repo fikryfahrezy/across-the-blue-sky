@@ -14,3 +14,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  ws:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile.ws
+      args:
+        - PORT=${WS_PORT}
+    env_file:
+      - path: ./.env
+        required: true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${WS_PORT}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

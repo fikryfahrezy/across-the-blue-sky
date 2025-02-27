@@ -14,7 +14,7 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build:next
+RUN npm run build:ws
 
 # 3. Production image, copy all the files and run next
 FROM base AS runner
@@ -23,21 +23,15 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN adduser --system --uid 1001 ws
 
-COPY --from=builder /app/public ./public
-
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=ws:nodejs /app/dist/ws.js ./ws.js
 
 
-USER nextjs
+USER ws
 
-ARG PORT=3000
+ARG PORT=3001
 EXPOSE ${PORT}
 
-ENV HOSTNAME="0.0.0.0"
 ENV PORT=${PORT}
-CMD ["node", "server.js"]
+CMD ["node", "ws.js"]
