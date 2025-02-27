@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:ws\" \"npm run dev:next\"",
     "dev:next": "next dev --turbopack",
-    "dev:ws": "node --env-file ./.env ./src/ws.mjs",
+    "dev:ws": "node --env-file=./.env ./src/ws.mjs",
     "build": "concurrently \"npm run build:ws\" \"npm run build:next\"",
     "build:ws": "esbuild ./src/ws.mjs --bundle --platform=node --outfile=./dist/ws.js",
     "build:next": "next build",

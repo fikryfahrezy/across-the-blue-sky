@@ -1,6 +1,8 @@
+import { createServer } from "http";
 import { WebSocketServer } from "ws";
 
-const wss = new WebSocketServer({ port: process.env.WS_PORT });
+const server = createServer();
+const wss = new WebSocketServer({ noServer: true });
 
 wss.on("connection", function connection(ws) {
   ws.on("error", console.error);
@@ -11,3 +13,13 @@ wss.on("connection", function connection(ws) {
 
   ws.send("something");
 });
+
+server.on("upgrade", function upgrade(request, socket, head) {
+  wss.handleUpgrade(request, socket, head, function done(ws) {
+    wss.emit("connection", ws, request);
+  });
+});
+
+const PORT = Number(process.env.WS_PORT);
+console.log(`Server listening on port ${PORT}`);
+server.listen(Number(process.env.WS_PORT));

@@ -30,8 +30,8 @@ COPY --from=builder --chown=ws:nodejs /app/dist/ws.js ./ws.js
 
 USER ws
 
-ARG PORT=3001
-EXPOSE ${PORT}
+ARG WS_PORT=3000
+EXPOSE ${WS_PORT}
 
-ENV PORT=${PORT}
+ENV WS_PORT=${WS_PORT}
 CMD ["node", "ws.js"]

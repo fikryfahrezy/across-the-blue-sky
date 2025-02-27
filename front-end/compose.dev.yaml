@@ -22,14 +22,9 @@ services:
       context: .
       dockerfile: Dockerfile.ws
       args:
-        - PORT=${WS_PORT}
+        - WS_PORT=${WS_PORT}
     env_file:
       - path: ./.env
         required: true
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${WS_PORT}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
     ports:
       - "${WS_PORT}:${WS_PORT}"
