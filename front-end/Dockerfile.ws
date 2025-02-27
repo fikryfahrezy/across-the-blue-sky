@@ -33,5 +33,4 @@ USER ws
 ARG WS_PORT=3000
 EXPOSE ${WS_PORT}
 
-ENV WS_PORT=${WS_PORT}
 CMD ["node", "ws.js"]

@@ -29,13 +29,13 @@
 }
 
 .firstChatBubble {
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 
 .lastChatBubble {
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 .spaceLeft {
@@ -59,13 +59,13 @@
 .arrowUpBefore::before {
   position: absolute;
   bottom: 0;
-  left: -5px;
+  left: -7px;
 }
 
 .arrowUpAfter::after {
   position: absolute;
   bottom: 0;
-  right: -5px;
+  right: -7px;
 }
 
 .userContainer {

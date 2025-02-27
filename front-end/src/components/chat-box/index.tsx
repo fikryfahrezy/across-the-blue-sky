@@ -1,6 +1,7 @@
 "use client";
 
 import { useChatSocket } from "@/hooks/use-chat-socket";
+import { toTitleCase } from "@/lib/string";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatInput } from "../chat-input";
 import { ChatItem } from "../chat-item";
@@ -11,7 +12,9 @@ const CHAT_KEYS = "chat-history";
 export type Message = {
   user: string;
   text: string;
-  type: "chat" | "clear-command";
+  bot_data: { name: string; detail: Record<string, unknown> } | null;
+  bot_to: string;
+  type: "chat" | "clear-command" | "bot-message";
 };
 
 export type ChatBoxProps = {
@@ -43,11 +46,14 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
     setMessages((_prevMessages) => {
       const prevMessages = _prevMessages || [];
       const newMessages =
-        message.type === "chat"
-          ? [...prevMessages, message]
-          : prevMessages.filter((prevMessage) => {
-              return prevMessage.user !== message.user;
-            });
+        message.type === "clear-command"
+          ? prevMessages.filter((prevMessage) => {
+              return (
+                prevMessage.user !== message.user &&
+                prevMessage.bot_to !== message.user
+              );
+            })
+          : [...prevMessages, message];
       return newMessages;
     });
   };
@@ -57,7 +63,14 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
 
     return (dataString: string) => {
       const newMessage = JSON.parse(dataString) as Message;
+      if (newMessage.user === "bot") {
+        newMessage.bot_to = user;
+      }
       storeMessage(newMessage);
+
+      if (newMessage.bot_data) {
+        return;
+      }
 
       if (debounceTimer) {
         window.clearTimeout(debounceTimer);
@@ -77,7 +90,13 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
   });
 
   const onSendMessage = (type: Message["type"], text: string) => {
-    const newMessage: Message = { user, text, type };
+    const newMessage: Message = {
+      user,
+      text,
+      type,
+      bot_data: null,
+      bot_to: "",
+    };
     storeMessage(newMessage);
     socket.sendMessage(JSON.stringify(newMessage));
   };
@@ -87,11 +106,11 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
   };
 
   useEffect(() => {
-    const storedMessages = window.localStorage.getItem(CHAT_KEYS);
+    const storedMessages = window.localStorage.getItem(`${CHAT_KEYS}_${user}`);
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!chatListContainer.current) {
@@ -128,7 +147,10 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
 
   useEffect(() => {
     if (messages) {
-      window.localStorage.setItem(CHAT_KEYS, JSON.stringify(messages));
+      window.localStorage.setItem(
+        `${CHAT_KEYS}_${user}`,
+        JSON.stringify(messages)
+      );
     }
   }, [messages]);
 
@@ -160,15 +182,27 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
             const firstUserBlock = lastMessage?.user !== message.user;
             const lastUserBlock = nextMessage?.user !== message.user;
 
+            const children = message.bot_data?.detail
+              ? `${toTitleCase(
+                  message.bot_data.detail.name
+                )} details from API\nHeight: ${
+                  message.bot_data.detail.height
+                }\nWeight: ${message.bot_data.detail.weight}`
+              : message.text;
+
             return (
               <ChatItem
                 key={i}
-                direction={message.user === user ? "right" : "left"}
+                direction={
+                  message.user === user || message.bot_to === user
+                    ? "right"
+                    : "left"
+                }
                 user={message.user}
                 isFirstBlock={firstUserBlock}
                 isLastBlock={lastUserBlock}
               >
-                {message.text}
+                {children}
               </ChatItem>
             );
           })
