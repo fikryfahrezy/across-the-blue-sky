@@ -11,10 +11,12 @@ export default function Home() {
       <div className={styles.chatBoxes}>
         <ChatBox
           title="Left Chat"
+          user="LC"
           classNames={`${styles.chatBox} ${styles.chatBoxLeft}`}
         />
         <ChatBox
           title="Right Chat"
+          user="RC"
           classNames={`${styles.chatBox} ${styles.chatBoxRight}`}
         />
       </div>

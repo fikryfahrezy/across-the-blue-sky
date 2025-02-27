@@ -24,7 +24,13 @@ export function ChatInput({ onSend }: ChatInputProps) {
       }
 
       content = inputRef.current.innerText;
-      setShowPlaceholder(!content.trim());
+
+      // When message cleared by user input it will leave a new line character
+      if (content.length === 1 && content.trim() === "") {
+        content = "";
+      }
+
+      setShowPlaceholder(!content);
     };
 
     const onKeydown = (event: KeyboardEvent) => {
@@ -32,8 +38,16 @@ export function ChatInput({ onSend }: ChatInputProps) {
         return;
       }
 
+      const sendingKeyPressed = event.key === "Enter" && !event.shiftKey;
+
+      // Prevent sending empty messages
+      if (sendingKeyPressed && !content.trim()) {
+        event.preventDefault();
+        return;
+      }
+
       // Send message on enter
-      if (event.key === "Enter" && !event.shiftKey) {
+      if (sendingKeyPressed) {
         event.preventDefault();
         inputRef.current.innerHTML = "";
         setShowPlaceholder(true);

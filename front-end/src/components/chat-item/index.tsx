@@ -2,13 +2,17 @@ import styles from "./styles.module.css";
 
 export type ChatItemProps = {
   children?: React.ReactNode;
-  alias?: string;
+  user?: string;
   direction?: "left" | "right";
+  isFirstBlock?: boolean;
+  isLastBlock?: boolean;
 };
 
 export function ChatItem({
   direction = "left",
-  alias,
+  user,
+  isFirstBlock,
+  isLastBlock,
   children,
 }: ChatItemProps) {
   const isLeftDirection = direction === "left";
@@ -20,18 +24,24 @@ export function ChatItem({
         isRightDirection ? styles.itemRight : ""
       }`}
     >
-      {alias && isLeftDirection && (
-        <div className={styles.aliasContainer}>{alias}</div>
+      {user && isLastBlock && isLeftDirection && (
+        <div className={styles.userContainer}>{user}</div>
       )}
       <div
-        className={`${styles.chatBubble}  ${
-          isLeftDirection ? styles.arrowUpBefore : styles.arrowUpAfter
-        }`}
+        className={`${styles.chatBubble} ${
+          isLeftDirection && isLastBlock ? styles.arrowUpBefore : ""
+        } ${isRightDirection && isLastBlock ? styles.arrowUpAfter : ""} ${
+          isLeftDirection && !isLastBlock ? styles.spaceLeft : ""
+        } ${isRightDirection && !isLastBlock ? styles.spaceRight : ""} ${
+          styles.middleChatBubble
+        } ${isFirstBlock ? styles.firstChatBubble : ""}
+        } ${isLastBlock ? styles.lastChatBubble : ""}
+        `}
       >
         {children}
       </div>
-      {alias && isRightDirection && (
-        <div className={styles.aliasContainer}>{alias}</div>
+      {user && isLastBlock && isRightDirection && (
+        <div className={styles.userContainer}>{user}</div>
       )}
     </div>
   );

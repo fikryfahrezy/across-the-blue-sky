@@ -8,10 +8,12 @@ wss.on("connection", function connection(ws) {
   ws.on("error", console.error);
 
   ws.on("message", function message(data) {
-    console.log("received: %s", data);
+    wss.clients.forEach((client) => {
+      if (ws !== client) {
+        client.send(data.toString());
+      }
+    });
   });
-
-  ws.send("something");
 });
 
 server.on("upgrade", function upgrade(request, socket, head) {

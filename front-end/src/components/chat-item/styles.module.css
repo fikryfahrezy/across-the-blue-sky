@@ -1,8 +1,10 @@
 .container {
+  --user-icon-size: 30px;
+  --bubble-gap: 10px;
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  gap: 10px;
+  gap: var(--bubble-gap);
 }
 
 .itemRight {
@@ -12,10 +14,36 @@
 .chatBubble {
   position: relative;
   padding: 5px;
-  border-radius: 15px;
   color: var(--background);
   background-color: var(--foreground);
+  min-width: 25px;
   width: fit-content;
+  white-space: pre-line;
+}
+
+.middleChatBubble {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+.firstChatBubble {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.lastChatBubble {
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+.spaceLeft {
+  margin-left: calc(var(--user-icon-size) + var(--bubble-gap));
+}
+
+.spaceRight {
+  margin-right: calc(var(--user-icon-size) + var(--bubble-gap));
 }
 
 .arrowUpBefore::before,
@@ -40,10 +68,10 @@
   right: -5px;
 }
 
-.aliasContainer {
+.userContainer {
   display: flex;
-  width: 30px;
-  height: 30px;
+  width: var(--user-icon-size);
+  height: var(--user-icon-size);
   color: var(--background);
   background-color: var(--foreground);
   font-weight: 900;

@@ -8,10 +8,13 @@ import styles from "./styles.module.css";
 export type ChatBoxProps = {
   title?: string;
   classNames?: string;
+  user: string;
 };
-
-export function ChatBox({ title, classNames }: ChatBoxProps) {
-  useChatSocket({ url: process.env.NEXT_PUBLIC_WS_URL });
+export function ChatBox({ title, classNames, user }: ChatBoxProps) {
+  const { messages, sendMessage } = useChatSocket({
+    url: process.env.NEXT_PUBLIC_WS_URL,
+    user: user,
+  });
 
   return (
     <section className={`${styles.chatBox} ${classNames}`}>
@@ -21,18 +24,28 @@ export function ChatBox({ title, classNames }: ChatBoxProps) {
         </div>
       )}
       <div className={styles.chatContainer}>
-        {[...Array(100)].map((_, i) => (
-          <ChatItem
-            key={i}
-            direction={i % 2 === 0 ? "left" : "right"}
-            alias={i % 2 === 0 ? "LC" : "RC"}
-          >
-            Chat Item {i}
-          </ChatItem>
-        ))}
+        {messages.map((message, i) => {
+          const lastMessage = messages[i - 1];
+          const nextMessage = messages[i + 1];
+
+          const firstUserBlock = lastMessage?.user !== message.user;
+          const lastUserBlock = nextMessage?.user !== message.user;
+
+          return (
+            <ChatItem
+              key={i}
+              direction={message.user === user ? "right" : "left"}
+              user={message.user}
+              isFirstBlock={firstUserBlock}
+              isLastBlock={lastUserBlock}
+            >
+              {message.text}
+            </ChatItem>
+          );
+        })}
       </div>
       <div className={styles.inputContainer}>
-        <ChatInput />
+        <ChatInput onSend={sendMessage} />
       </div>
     </section>
   );

@@ -1,24 +1,26 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+export type Message = {
+  user: string;
+  text: string;
+};
 
 export type UseChatOptions = {
   url: string;
+  user: string;
 };
 
-export function useChatSocket({ url }: UseChatOptions) {
+export function useChatSocket({ url, user }: UseChatOptions) {
   const wsRef = useRef<WebSocket | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     // Create WebSocket connection.
     const socket = new WebSocket(url);
 
-    // Connection opened
-    socket.addEventListener("open", () => {
-      socket.send("Hello Server!");
-    });
-
     // Listen for messages
     socket.addEventListener("message", (event) => {
-      console.log("Message from server ", event.data);
+      setMessages((prevMessages) => [...prevMessages, JSON.parse(event.data)]);
     });
 
     wsRef.current = socket;
@@ -27,4 +29,20 @@ export function useChatSocket({ url }: UseChatOptions) {
       socket.close();
     };
   }, [url]);
+
+  const sendMessage = (text: string) => {
+    const newMessage: Message = { user, text };
+
+    setMessages((prevMessages) => {
+      return [...prevMessages, newMessage];
+    });
+
+    console.log(wsRef.current);
+    wsRef.current?.send(JSON.stringify(newMessage));
+  };
+
+  return {
+    messages,
+    sendMessage,
+  };
 }
