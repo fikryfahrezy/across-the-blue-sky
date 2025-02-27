@@ -1,7 +1,7 @@
 "use client";
 
 import { useChatSocket } from "@/hooks/use-chat-socket";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChatInput } from "../chat-input";
 import { ChatItem } from "../chat-item";
 import styles from "./styles.module.css";
@@ -11,7 +11,7 @@ const CHAT_KEYS = "chat-history";
 export type Message = {
   user: string;
   text: string;
-  type: "chat" | "delete-command";
+  type: "chat" | "clear-command";
 };
 
 export type ChatBoxProps = {
@@ -22,6 +22,7 @@ export type ChatBoxProps = {
 
 export function ChatBox({ title, classNames, user }: ChatBoxProps) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessageAppear, setNewMessageAppear] = useState(false);
 
   const storeMessage = (message: Message) => {
     setMessages((prevMessages) => {
@@ -36,12 +37,28 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
     });
   };
 
-  const socket = useChatSocket({
-    url: process.env.NEXT_PUBLIC_WS_URL,
-    onNewMessage: (dataString) => {
+  const onNewMessage = useMemo(() => {
+    let debounceTimer: undefined | number;
+
+    return (dataString: string) => {
       const newMessage = JSON.parse(dataString) as Message;
       storeMessage(newMessage);
-    },
+
+      if (debounceTimer) {
+        window.clearTimeout(debounceTimer);
+        setNewMessageAppear(false);
+      }
+
+      setNewMessageAppear(true);
+      debounceTimer = window.setTimeout(() => {
+        setNewMessageAppear(false);
+      }, 1000);
+    };
+  }, []);
+
+  const socket = useChatSocket({
+    url: process.env.NEXT_PUBLIC_WS_URL,
+    onNewMessage: onNewMessage,
   });
 
   const onSendMessage = (type: Message["type"], text: string) => {
@@ -51,7 +68,7 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
   };
 
   const onClearMessage = () => {
-    onSendMessage("delete-command", "");
+    onSendMessage("clear-command", "");
   };
 
   useEffect(() => {
@@ -62,7 +79,11 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
   }, []);
 
   return (
-    <section className={`${styles.chatBox} ${classNames}`}>
+    <section
+      className={`${styles.chatBox} ${
+        newMessageAppear ? styles.flash : ""
+      } ${classNames}`}
+    >
       {title && (
         <div className={styles.titleContainer}>
           <h2>{title}</h2>
@@ -73,6 +94,11 @@ export function ChatBox({ title, classNames, user }: ChatBoxProps) {
           >
             Clear
           </button>
+        </div>
+      )}
+      {messages.length === 0 && (
+        <div className={styles.emptyChat}>
+          <p>No messages yet</p>
         </div>
       )}
       <div className={styles.chatContainer}>
