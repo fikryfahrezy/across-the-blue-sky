@@ -1,4 +1,5 @@
 import requests
+import random
 from typing import Annotated, Dict, Any, Optional, Generator
 from fastapi import Depends, FastAPI, HTTPException
 from sqlmodel import Field, Session, SQLModel, create_engine, select, JSON, Column
@@ -34,6 +35,35 @@ SessionDep = Annotated[Session, Depends(get_session)]
 # Initialize settings and FastAPI app
 app: FastAPI = FastAPI()
 
+pokemon_api_url: str = "https://pokeapi.co/api/v2/pokemon"
+
+def get_pokemon_from_api(path: str) -> Optional[Dict[str, Any]]:
+    path = path.replace(pokemon_api_url, "")
+    url: str = f"{pokemon_api_url}{path}"
+    headers: Dict[str, str] = {
+        "Content-Type": "application/json"
+    }
+
+    response = requests.get(url, headers=headers)
+    # Check if the request was successful
+    if response.status_code != 200:
+        return None
+
+    # Parse the JSON response and return
+    return response.json()
+
+def get_pokemon_from_database(session: Any, pokemon_name: str) -> Optional[Pokemon]:
+    statement = select(Pokemon).where(Pokemon.name == pokemon_name)
+    results: Any = session.exec(statement)
+    pokemon: Optional[Pokemon] = results.first()
+    return pokemon
+
+def save_pokemon_to_database(session: Any, pokemon: Pokemon) -> Optional[Pokemon]:
+    session.add(pokemon)
+    session.commit()
+    session.refresh(pokemon)
+    return pokemon
+
 # Event handler for startup
 @app.on_event("startup")
 def on_startup() -> None:
@@ -44,30 +74,39 @@ def on_startup() -> None:
 def read_root() -> Dict[str, str]:
     return {"Hello": "World"}
 
-# Endpoint to fetch a Pokemon by name
-@app.get("/pokemons/{pokemon_name}")
-def read_pokemon(pokemon_name: str, session: SessionDep) -> Pokemon:
-    statement = select(Pokemon).where(Pokemon.name == pokemon_name)
-    results: Any = session.exec(statement)
-    pokemon: Optional[Pokemon] = results.first()
 
+# Endpoint to fetch a random Pokemon
+@app.get("/pokemon")
+def read_pokemon(session: SessionDep) -> Pokemon:
+    path = "?limit=100000&offset=0"
+    pokemon_list = get_pokemon_from_api(path)
+    pokemon = random.choice(pokemon_list["results"])
+
+    pokemon_from_db = get_pokemon_from_database(session, pokemon_name=pokemon["name"])
+    if pokemon_from_db:
+        return pokemon_from_db
+
+    pokemon_detail = get_pokemon_from_api(pokemon["url"])
+    if not pokemon_detail:
+        raise HTTPException(status_code=404, detail="Pokemon not found")
+
+    new_pokemon = Pokemon(name=pokemon["name"], detail=pokemon_detail)
+    save_pokemon_to_database(session, new_pokemon)
+    return new_pokemon
+
+
+# Endpoint to fetch a Pokemon by name
+@app.get("/pokemon/{pokemon_name}")
+def read_pokemon(pokemon_name: str, session: SessionDep) -> Pokemon:
+    pokemon = get_pokemon_from_database(session, pokemon_name=pokemon_name)
     if pokemon:
         return pokemon
 
-    url: str = f"https://pokeapi.co/api/v2/pokemon/{pokemon_name}"
-    headers: Dict[str, str] = {
-        "Content-Type": "application/json"
-    }
-
-    response = requests.get(url, headers=headers)
-    # Check if the request was successful
-    if response.status_code != 200:
+    path = f"/{pokemon_name}"
+    pokemon_detail = get_pokemon_from_api(path)
+    if not pokemon_detail:
         raise HTTPException(status_code=404, detail="Pokemon not found")
     
-    # Parse the JSON response
-    data = response.json()
-    new_pokemon = Pokemon(name=pokemon_name, detail=data)
-    session.add(new_pokemon)
-    session.commit()
-    session.refresh(new_pokemon)
+    new_pokemon = Pokemon(name=pokemon_name, detail=pokemon_detail)
+    save_pokemon_to_database(session, new_pokemon)
     return new_pokemon
