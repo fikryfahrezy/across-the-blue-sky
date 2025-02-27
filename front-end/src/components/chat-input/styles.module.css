@@ -1,10 +1,15 @@
 .container {
+  --container-height: 40px;
+  display: flex;
   width: 100%;
-  min-height: 40px;
+  min-height: var(--container-height);
+  align-items: flex-end;
 }
 
 .chatInputContainer {
   position: relative;
+  width: 87%;
+  margin-right: 3%;
 }
 
 .chatInput {
@@ -20,4 +25,11 @@
   top: 25%;
   left: 10px;
   pointer-events: none;
+}
+
+.sendButton {
+  width: 10%;
+  height: var(--container-height);
+  background-color: var(--background);
+  color: var(--foreground);
 }

@@ -12,22 +12,31 @@ export type ChatInputProps = {
 };
 
 export function ChatInput({ onSend = noop }: ChatInputProps) {
-  const formRef = useRef<HTMLFormElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef("");
   const [showPlaceholder, setShowPlaceholder] = useState(true);
+
+  const sendContent = () => {
+    setShowPlaceholder(true);
+    onSend(contentRef.current);
+    contentRef.current = "";
+    if (inputRef.current) {
+      inputRef.current.innerHTML = "";
+    }
+  };
 
   useEffect(() => {
     if (!inputRef.current) {
       return;
     }
 
-    let content = "";
     const onInput = () => {
       if (!inputRef.current) {
         return;
       }
 
-      content = inputRef.current.innerText;
+      let content = inputRef.current.innerText;
 
       // When message cleared by user input it will leave a new line character
       if (content.length === 1 && content.trim() === "") {
@@ -35,13 +44,11 @@ export function ChatInput({ onSend = noop }: ChatInputProps) {
       }
 
       setShowPlaceholder(!content);
+      contentRef.current = content;
     };
 
     const onKeydown = (event: KeyboardEvent) => {
-      if (!inputRef.current) {
-        return;
-      }
-
+      const content = contentRef.current;
       const sendingKeyPressed = event.key === "Enter" && !event.shiftKey;
 
       // Prevent sending empty messages
@@ -53,10 +60,7 @@ export function ChatInput({ onSend = noop }: ChatInputProps) {
       // Send message on enter
       if (sendingKeyPressed) {
         event.preventDefault();
-        setShowPlaceholder(true);
-        onSend(content);
-        inputRef.current.innerHTML = "";
-        content = "";
+        sendContent();
       }
     };
 
@@ -77,7 +81,7 @@ export function ChatInput({ onSend = noop }: ChatInputProps) {
   }, []);
 
   return (
-    <form ref={formRef} className={styles.container}>
+    <div ref={containerRef} className={styles.container}>
       <div className={styles.chatInputContainer}>
         <div
           ref={inputRef}
@@ -89,6 +93,9 @@ export function ChatInput({ onSend = noop }: ChatInputProps) {
           <span className={styles.chatInputPlaceholder}>Type a message</span>
         )}
       </div>
-    </form>
+      <button type="button" onClick={sendContent} className={styles.sendButton}>
+        Send
+      </button>
+    </div>
   );
 }
