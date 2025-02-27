@@ -3,11 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
 
+const noop = () => {
+  return;
+};
+
 export type ChatInputProps = {
   onSend?: (text: string) => void;
 };
 
-export function ChatInput({ onSend }: ChatInputProps) {
+export function ChatInput({ onSend = noop }: ChatInputProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
   const [showPlaceholder, setShowPlaceholder] = useState(true);
@@ -49,9 +53,10 @@ export function ChatInput({ onSend }: ChatInputProps) {
       // Send message on enter
       if (sendingKeyPressed) {
         event.preventDefault();
-        inputRef.current.innerHTML = "";
         setShowPlaceholder(true);
-        onSend?.(content);
+        onSend(content);
+        inputRef.current.innerHTML = "";
+        content = "";
       }
     };
 

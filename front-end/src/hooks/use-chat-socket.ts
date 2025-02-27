@@ -1,18 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-export type Message = {
-  user: string;
-  text: string;
+const noop = () => {
+  return;
 };
 
 export type UseChatOptions = {
   url: string;
-  user: string;
+  onNewMessage?: (dataString: string) => void;
 };
 
-export function useChatSocket({ url, user }: UseChatOptions) {
+export function useChatSocket({ url, onNewMessage = noop }: UseChatOptions) {
   const wsRef = useRef<WebSocket | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     // Create WebSocket connection.
@@ -20,7 +18,7 @@ export function useChatSocket({ url, user }: UseChatOptions) {
 
     // Listen for messages
     socket.addEventListener("message", (event) => {
-      setMessages((prevMessages) => [...prevMessages, JSON.parse(event.data)]);
+      onNewMessage(event.data);
     });
 
     wsRef.current = socket;
@@ -30,19 +28,11 @@ export function useChatSocket({ url, user }: UseChatOptions) {
     };
   }, [url]);
 
-  const sendMessage = (text: string) => {
-    const newMessage: Message = { user, text };
-
-    setMessages((prevMessages) => {
-      return [...prevMessages, newMessage];
-    });
-
-    console.log(wsRef.current);
-    wsRef.current?.send(JSON.stringify(newMessage));
+  const sendMessage = (dataString: string) => {
+    wsRef.current?.send(dataString);
   };
 
   return {
-    messages,
     sendMessage,
   };
 }

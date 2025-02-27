@@ -8,8 +8,20 @@
 }
 
 .titleContainer {
+  display: flex;
   padding: 10px;
   border-bottom: 3px solid var(--foreground);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.clearButton {
+  background-color: var(--foreground);
+  color: var(--background);
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+  cursor: pointer;
 }
 
 .chatContainer {
