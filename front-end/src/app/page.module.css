@@ -39,9 +39,17 @@
     width: 100%;
   }
 
-  .chatBoxLeft,
-  .chatBoxRight {
+  .chatBox {
+    height: 49.7%;
+  }
+
+  .chatBoxLeft {
     margin-right: 0;
+    margin-bottom: 0.3%;
+  }
+
+  .chatBoxRight {
     margin-left: 0;
+    margin-top: 0.3%;
   }
 }

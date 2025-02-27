@@ -25,4 +25,5 @@
   display: flex;
   padding: 10px;
   background-color: var(--foreground);
+  overflow-y: scroll;
 }

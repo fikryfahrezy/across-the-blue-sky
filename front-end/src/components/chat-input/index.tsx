@@ -1,9 +1,75 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
 
-export type ChatInputProps = {};
+export type ChatInputProps = {
+  onSend?: (text: string) => void;
+};
 
-export function ChatInput({}: ChatInputProps) {
+export function ChatInput({ onSend }: ChatInputProps) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLDivElement>(null);
+  const [showPlaceholder, setShowPlaceholder] = useState(true);
+
+  useEffect(() => {
+    if (!inputRef.current) {
+      return;
+    }
+
+    let content = "";
+    const onInput = () => {
+      if (!inputRef.current) {
+        return;
+      }
+
+      content = inputRef.current.innerText;
+      setShowPlaceholder(!content.trim());
+    };
+
+    const onKeydown = (event: KeyboardEvent) => {
+      if (!inputRef.current) {
+        return;
+      }
+
+      // Send message on enter
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        inputRef.current.innerHTML = "";
+        setShowPlaceholder(true);
+        onSend?.(content);
+      }
+    };
+
+    const abortController = new AbortController();
+    inputRef.current.addEventListener("input", onInput, {
+      signal: abortController.signal,
+    });
+    inputRef.current.addEventListener("focusout", onInput, {
+      signal: abortController.signal,
+    });
+    inputRef.current.addEventListener("keydown", onKeydown, {
+      signal: abortController.signal,
+    });
+
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
   return (
-    <div className={styles.container} contentEditable="true" dir="auto"></div>
+    <form ref={formRef} className={styles.container}>
+      <div className={styles.chatInputContainer}>
+        <div
+          ref={inputRef}
+          className={styles.chatInput}
+          contentEditable="true"
+          dir="auto"
+        ></div>
+        {showPlaceholder && (
+          <span className={styles.chatInputPlaceholder}>Type a message</span>
+        )}
+      </div>
+    </form>
   );
 }
