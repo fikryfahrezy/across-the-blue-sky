@@ -32,4 +32,7 @@ USER ws
 ARG WS_PORT=3000
 EXPOSE ${WS_PORT}
 
+HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
+    CMD nc -z localhost ${WS_PORT} || exit 1
+
 CMD ["node", "ws.js"]
