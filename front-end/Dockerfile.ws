@@ -27,7 +27,6 @@ RUN adduser --system --uid 1001 ws
 
 COPY --from=builder --chown=ws:nodejs /app/dist/ws.js ./ws.js
 
-
 USER ws
 
 ARG WS_PORT=3000
