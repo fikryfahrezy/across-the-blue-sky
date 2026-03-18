@@ -18,6 +18,11 @@ RUN npm run build:ws
 
 # 3. Production image, copy all the files and run next
 FROM base AS runner
+
+RUN apt update && \
+    apt install -y netcat-openbsd && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 ENV NODE_ENV=production
